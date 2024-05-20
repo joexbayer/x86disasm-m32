@@ -268,6 +268,20 @@ int disassemble_instruction(const uint8_t *buffer, size_t length, size_t *offset
                     }
                 }
                 break;
+                case 0xBE: { /* movsx r32, r/m8 */
+                        modrm_t modrm = get_modrm(buffer, offset);
+                        if (modrm.mod == 3) {
+                            printf("movsx %s, %s\n", reg_names[modrm.reg_opcode], reg_names[modrm.rm]);
+                        } else {
+                            int32_t displacement = get_displacement(buffer, offset, modrm.mod);
+                            if (displacement == 0) {
+                                printf("movsx %s, (%s)\n", reg_names[modrm.reg_opcode], reg_names[modrm.rm]);
+                            } else {
+                                printf("movsx %s, %d(%s)\n", reg_names[modrm.reg_opcode], displacement, reg_names[modrm.rm]);
+                            }
+                        }
+                    }
+                break;
                 case 0xAF: { /* imul */
                     modrm_t modrm = get_modrm(buffer, offset);
                     int32_t displacement = get_displacement(buffer, offset, modrm.mod);
@@ -319,6 +333,14 @@ int disassemble_instruction(const uint8_t *buffer, size_t length, size_t *offset
     case 0x99: /* cdq */
         printf("cdq\n");
         break;
+    case 0x98: { /* cbw/cwde */
+        if (operand_size_override) {    
+            printf("cbw\n");
+        } else {
+            printf("cwde\n");
+        }
+    }
+    break;
     case 0x90: /* nop */
         printf("nop\n");
         break;
@@ -365,6 +387,9 @@ int disassemble_instruction(const uint8_t *buffer, size_t length, size_t *offset
                 break;
             case 7: /* cmp */
                 printf("cmp%s $0x%x, %d(%s)\n", sizemod(), immediate_value, displacement, reg_names[modrm.rm]);
+                break;
+            case 4: /* and */
+                printf("and%s $0x%x, %d(%s)\n", sizemod(), immediate_value, displacement, reg_names[modrm.rm]);
                 break;
             default:
                 printf("Unknown 0x83 instruction with reg_opcode %d\n", modrm.reg_opcode);
@@ -758,6 +783,18 @@ int disassemble_instruction(const uint8_t *buffer, size_t length, size_t *offset
     case 0x5d: /* pop %ebp */
         printf("pop %%ebp\n");
         break;
+    case 0x5b: /* pop %ebx */
+        printf("pop %%ebx\n");
+        break; 
+    case 0x5a: /* pop %edx */
+        printf("pop %%edx\n");
+        break;
+    case 0x5e: /* pop %esi */
+        printf("pop %%esi\n");
+        break;
+    case 0x5f: /* pop %edi */
+        printf("pop %%edi\n");
+        break;
     case 0x2B: { /* sub */
             modrm_t modrm = get_modrm(buffer, offset);
             int32_t displacement = get_displacement(buffer, offset, modrm.mod);
@@ -773,6 +810,10 @@ int disassemble_instruction(const uint8_t *buffer, size_t length, size_t *offset
         break;
     case 0x56: /* push esi */
         printf("push %%esi\n");
+        break;
+    case 0x51: {
+            printf("push %%ecx\n");
+        }
         break;
     case 0xE9: { /* jmp */
         int32_t displacement = fetch_immediate(buffer, offset, 4);
