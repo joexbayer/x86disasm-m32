@@ -30,9 +30,12 @@ int main() {
     return 0;
 }
 ```
+## Resouces used for the implementation
+
+- [X86 Opcode and Instruction Reference](http://ref.x86asm.net/coder32.html)
+- [Intel® 64 and IA-32 Architectures Software Developer’s Manual](https://software.intel.com/content/www/us/en/develop/articles/intel-sdm.html)
 
 ## Currently supported instructions:
-# Supported Instructions
 
 | Opcode | Mnemonic        | Description                               |
 |--------|-----------------|-------------------------------------------|
